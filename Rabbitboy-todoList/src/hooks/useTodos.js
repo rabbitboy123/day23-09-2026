@@ -97,6 +97,18 @@ export function useTodos() {
     setTodos((prev) => prev.filter((item) => !item.completed));
   };
 
+  // ghim nhiệm vụ ưu tiên lên đầu danh sách
+  const prioritizeTodo = (id) => {
+      setTodos((prev) => {
+        const itemToPrioritize = prev.find((item) => item.id === id);
+        if (!itemToPrioritize) return prev;
+        
+        // Lọc ra các phần tử còn lại (không đụng vào mảng cũ)
+        const remaining = prev.filter((item) => item.id !== id);
+        return [itemToPrioritize, ...remaining];
+      });
+    };
+
   // Lọc danh sách theo Search + Status Filter + Agent Filter
   const filteredTodos = todos.filter((item) => {
     // 1. Lọc theo trạng thái
@@ -127,6 +139,7 @@ export function useTodos() {
 
   return {
     todos: filteredTodos,
+    prioritizeTodo,
     allTodosCount: totalCount,
     activeCount,
     completedCount,

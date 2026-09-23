@@ -15,6 +15,7 @@ export default function App() {
     progressPercent,
     searchQuery,
     setSearchQuery,
+    prioritizeTodo,
     statusFilter,
     setStatusFilter,
     agentFilter,
@@ -89,6 +90,7 @@ export default function App() {
               onToggle={toggleTodo}
               onEdit={editTodo}
               onDelete={deleteTodo}
+              onPrioritize={prioritizeTodo}
             />
           </div>
         </main>

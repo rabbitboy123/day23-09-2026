@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { AGENTS, THREAT_LEVELS } from '../../constants/agents';
+import React, { useState } from "react";
+import { AGENTS, THREAT_LEVELS } from "../../constants/agents";
 
-const TodoItem = ({ todo, onToggle, onEdit, onDelete }) => {
+const TodoItem = ({ todo, onToggle, onEdit, onDelete, onPrioritize }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(todo.title);
 
@@ -26,8 +26,8 @@ const TodoItem = ({ todo, onToggle, onEdit, onDelete }) => {
     <div
       className={`group relative bg-[#161F2A]/90 border transition-all duration-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
         todo.completed
-          ? 'border-[#1F2731] opacity-60 bg-[#121921]/90'
-          : 'border-[#2B3540] hover:border-[#FF4655]/80 hover:shadow-[0_0_15px_rgba(255,70,85,0.15)]'
+          ? "border-[#1F2731] opacity-60 bg-[#121921]/90"
+          : "border-[#2B3540] hover:border-[#FF4655]/80 hover:shadow-[0_0_15px_rgba(255,70,85,0.15)]"
       }`}
     >
       {/* Vạch màu chỉ thị cấp độ nguy hiểm bên trái */}
@@ -40,11 +40,13 @@ const TodoItem = ({ todo, onToggle, onEdit, onDelete }) => {
         {/* Nút Checkbox hoàn thành kiểu Tactical */}
         <button
           onClick={() => onToggle(todo.id)}
-          title={todo.completed ? 'Đánh dấu chưa hoàn thành' : 'Đánh dấu đã giải mã'}
+          title={
+            todo.completed ? "Đánh dấu chưa hoàn thành" : "Đánh dấu đã giải mã"
+          }
           className={`w-6 h-6 shrink-0 border flex items-center justify-center transition-all cursor-pointer ${
             todo.completed
-              ? 'border-[#00F5D4] bg-[#00F5D4] text-[#0F1923] shadow-[0_0_8px_rgba(0,245,212,0.4)]'
-              : 'border-gray-500 hover:border-[#FF4655] bg-[#0F1923]'
+              ? "border-[#00F5D4] bg-[#00F5D4] text-[#0F1923] shadow-[0_0_8px_rgba(0,245,212,0.4)]"
+              : "border-gray-500 hover:border-[#FF4655] bg-[#0F1923]"
           }`}
         >
           {todo.completed && <span className="font-black text-sm">✓</span>}
@@ -89,7 +91,10 @@ const TodoItem = ({ todo, onToggle, onEdit, onDelete }) => {
 
           {/* Tiêu đề nhiệm vụ: Chế độ hiển thị bình thường hoặc Chế độ chỉnh sửa */}
           {isEditing ? (
-            <form onSubmit={handleSaveEdit} className="flex items-center gap-2 mt-2">
+            <form
+              onSubmit={handleSaveEdit}
+              className="flex items-center gap-2 mt-2"
+            >
               <input
                 type="text"
                 value={editTitle}
@@ -115,8 +120,8 @@ const TodoItem = ({ todo, onToggle, onEdit, onDelete }) => {
             <div
               className={`text-sm md:text-base font-semibold transition-colors break-words ${
                 todo.completed
-                  ? 'line-through text-gray-500 italic'
-                  : 'text-white'
+                  ? "line-through text-gray-500 italic"
+                  : "text-white"
               }`}
             >
               {todo.title}
@@ -135,6 +140,14 @@ const TodoItem = ({ todo, onToggle, onEdit, onDelete }) => {
             className="text-xs px-2.5 py-1 border border-[#2B3540] text-gray-400 hover:text-white hover:border-gray-400 transition-colors uppercase font-bold cursor-pointer"
           >
             ✏️ SỬA
+          </button>
+
+          <button
+            onClick={() => onPrioritize(todo.id)}
+            title="Ghim nhiệm vụ lên đầu danh sách"
+            className="text-xs px-2.5 py-1 border border-amber-500/40 text-amber-400 hover:bg-amber-400 hover:text-black transition-all font-bold cursor-pointer"
+          >
+            📌 GHIM
           </button>
 
           {/* Nút hủy/xóa */}

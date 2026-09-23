@@ -1,7 +1,7 @@
 import React from 'react';
 import TodoItem from '../TodoItem/index';
 
-const TodoList = ({ todos, onToggle, onEdit, onDelete }) => {
+const TodoList = ({ todos, onToggle, onEdit, onDelete, onPrioritize }) => {
   if (!todos || todos.length === 0) {
     return (
       <div className="bg-[#161F2A]/90 border border-dashed border-[#2B3540] p-12 text-center">
@@ -25,6 +25,7 @@ const TodoList = ({ todos, onToggle, onEdit, onDelete }) => {
           onToggle={onToggle}
           onEdit={onEdit}
           onDelete={onDelete}
+          onPrioritize={onPrioritize}
         />
       ))}
     </div>
