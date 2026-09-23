@@ -1,82 +1,148 @@
 import { useState, useEffect } from 'react';
+import { generateDirectiveId, getMilitaryTime } from '../utils/helpers';
 
-const STORAGE_KEY = 'TODOLIST_DON_GIAN';
+const STORAGE_KEY = 'VALORANT_DIRECTIVES_STORAGE';
 
-// Dữ liệu mẫu ban đầu để bạn dễ quan sát giao diện
-const DEFAULT_TODOS = [
-  { id: 1, text: 'Học cách chia Component trong React', completed: true },
-  { id: 2, text: 'Hiểu về Props và State', completed: false },
-  { id: 3, text: 'Thực hành viết Custom Hook useTodos', completed: false },
+// Danh sách nhiệm vụ mặc định ban đầu mang phong cách Valorant
+const DEFAULT_DIRECTIVES = [
+  {
+    id: 'DIR-8401',
+    title: 'Đặt bẫy Trapwire và Spycam kiểm soát Site B',
+    agent: 'CYPHER',
+    priority: 'HIGH',
+    completed: false,
+    timestamp: '08:30:15',
+  },
+  {
+    id: 'DIR-9214',
+    title: 'Kích hoạt Lockdown vô hiệu hóa kẻ địch chiếm Site A',
+    agent: 'KILLJOY',
+    priority: 'CRITICAL',
+    completed: true,
+    timestamp: '09:12:44',
+  },
+  {
+    id: 'DIR-5520',
+    title: 'Dùng Leer làm mù và đẩy nhanh vào Mid khu vực',
+    agent: 'REYNA',
+    priority: 'STANDARD',
+    completed: false,
+    timestamp: '10:05:20',
+  },
 ];
 
 export function useTodos() {
-  // 1. State lưu danh sách công việc (lấy từ LocalStorage nếu đã từng lưu)
+  // 1. Quản lý danh sách nhiệm vụ từ LocalStorage
   const [todos, setTodos] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : DEFAULT_TODOS;
+      return saved ? JSON.parse(saved) : DEFAULT_DIRECTIVES;
     } catch {
-      return DEFAULT_TODOS;
+      return DEFAULT_DIRECTIVES;
     }
   });
 
-  // 2. State lưu trạng thái lọc: 'ALL' (Tất cả), 'ACTIVE' (Chưa xong), 'COMPLETED' (Đã xong)
-  const [filter, setFilter] = useState('ALL');
+  // 2. Các trạng thái tìm kiếm & bộ lọc
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL'); // ALL, ACTIVE, COMPLETED
+  const [agentFilter, setAgentFilter] = useState('ALL'); // ALL hoặc CYPHER, KILLJOY...
 
-  // 3. Tự động lưu vào LocalStorage mỗi khi mảng `todos` thay đổi
+  // Tự động lưu LocalStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
     } catch (err) {
-      console.error('Không thể lưu vào localStorage:', err);
+      console.error('Lỗi khi lưu localStorage:', err);
     }
   }, [todos]);
 
-  // Hàm thêm một công việc mới
-  const addTodo = (text) => {
-    const newTodo = {
-      id: Date.now(), // Dùng timestamp làm id để không bao giờ bị trùng
-      text: text,
+  // Thêm nhiệm vụ mới
+  const addTodo = ({ title, agent, priority }) => {
+    const newDirective = {
+      id: generateDirectiveId(),
+      title,
+      agent,
+      priority,
       completed: false,
+      timestamp: getMilitaryTime(),
     };
-    // Đưa công việc mới lên đầu danh sách
-    setTodos([newTodo, ...todos]);
+    setTodos((prev) => [newDirective, ...prev]);
   };
 
-  // Hàm đổi trạng thái hoàn thành (bật/tắt completed)
+  // Đổi trạng thái hoàn thành / chưa hoàn thành
   const toggleTodo = (id) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+    setTodos((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, completed: !item.completed } : item
       )
     );
   };
 
-  // Hàm xóa công việc theo id
-  const deleteTodo = (id) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
+  // Sửa thông tin nhiệm vụ
+  const editTodo = (id, newTitle) => {
+    setTodos((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, title: newTitle } : item
+      )
+    );
   };
 
-  // Lọc ra danh sách hiển thị theo filter hiện tại
-  const filteredTodos = todos.filter((todo) => {
-    if (filter === 'ACTIVE') return !todo.completed;
-    if (filter === 'COMPLETED') return todo.completed;
-    return true; // 'ALL' thì lấy hết
+  // Xóa 1 nhiệm vụ
+  const deleteTodo = (id) => {
+    setTodos((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  // Thanh trừng toàn bộ nhiệm vụ đã hoàn thành
+  const purgeCompleted = () => {
+    setTodos((prev) => prev.filter((item) => !item.completed));
+  };
+
+  // Lọc danh sách theo Search + Status Filter + Agent Filter
+  const filteredTodos = todos.filter((item) => {
+    // 1. Lọc theo trạng thái
+    if (statusFilter === 'ACTIVE' && item.completed) return false;
+    if (statusFilter === 'COMPLETED' && !item.completed) return false;
+
+    // 2. Lọc theo Agent
+    if (agentFilter !== 'ALL' && item.agent !== agentFilter) return false;
+
+    // 3. Lọc theo từ khóa tìm kiếm (tên nhiệm vụ hoặc mã chỉ thị)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const matchTitle = item.title.toLowerCase().includes(query);
+      const matchId = item.id.toLowerCase().includes(query);
+      const matchAgent = item.agent.toLowerCase().includes(query);
+      if (!matchTitle && !matchId && !matchAgent) return false;
+    }
+
+    return true;
   });
 
-  // Số lượng tổng và số lượng đã hoàn thành
+  // Thống kê
   const totalCount = todos.length;
   const completedCount = todos.filter((t) => t.completed).length;
+  const activeCount = totalCount - completedCount;
+  const progressPercent =
+    totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-  // Trả về toàn bộ dữ liệu và các hàm để App.jsx sử dụng
   return {
     todos: filteredTodos,
-    totalCount,
+    allTodosCount: totalCount,
+    activeCount,
     completedCount,
-    filter,
-    setFilter,
+    progressPercent,
+    // Bộ lọc & Tìm kiếm
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    agentFilter,
+    setAgentFilter,
+    // Thao tác CRUD
     addTodo,
     toggleTodo,
+    editTodo,
     deleteTodo,
+    purgeCompleted,
   };
 }

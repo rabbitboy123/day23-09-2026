@@ -1,1 +1,28 @@
 @import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 0.025em;
+  }
+
+  h1, h2, h3, h4, h5, h6, button {
+    font-family: 'Chakra Petch', sans-serif;
+  }
+}
+
+/* Tùy chỉnh thanh cuộn mang phong cách Valorant */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0F1923;
+}
+::-webkit-scrollbar-thumb {
+  background: #2B3540;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #FF4655;
+}
